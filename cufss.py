@@ -6,6 +6,7 @@ from hashlib import sha256
 from magic import Magic
 from mimetypes import guess_extension
 from pathlib import Path
+import json
 
 
 STORAGE_PATH = "filestorage"
@@ -25,6 +26,15 @@ class File(db.Model):
 
     def __repr__(self) -> str:
         return f"{self.id}:\n\text: {self.extension}\n\tmime: {self.mime_type}"
+
+    def json(self)-> str:
+        res = {
+            "id": self.id,
+            "ext": self.extension,
+            "mime": self.mime_type,
+            "digest": self.digest 
+        }
+        return json.dumps(res)
 
     def __init__(self, digest, extension, mime_type) -> None:
         self.digest = digest
@@ -72,7 +82,7 @@ class File(db.Model):
     @classmethod
     def print(cls, id):
         file: File = cls.query.get(id)
-        return str(file)
+        return file.json()
 
 db.create_all()
 
@@ -93,9 +103,9 @@ def get(id):
         res = Response(response=file.read(), mimetype=file.mime_type)
         return res
 
-@app.route("/print/<id>", methods=["POST"])
+@app.route("/print/<id>", methods=["GET"])
 def print_file(id):
-    if request.method == "POST":
+    if request.method == "GET":
         return File.print(id)
     abort(400)
 
