@@ -55,14 +55,13 @@ class File(db.Model):
     @classmethod
     def get(cls, id):
         file: File = cls.query.get(id)
-        file_path = Path(STORAGE_PATH) / file.digest
-        with open(file_path, 'rb') as f:
-            return f.read()
+        return file
+
 
     @classmethod
     def print(cls, id):
         file: File = cls.query.get(id)
-        print(file)
+        return str(file)
 
 db.create_all()
 
@@ -87,8 +86,7 @@ def get(id):
 @app.route("/print/<id>", methods=["POST"])
 def print_file(id):
     if request.method == "POST":
-        File.print(id)
-        return "OK"
+        return File.print(id)
     abort(400)
 
 if __name__=="__main__":
