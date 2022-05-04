@@ -21,9 +21,9 @@ Return the file with id=`<id>` in the storage.
 Return a dictionary containing information about a file with id=`<id>`.
 ```json
 {
-    "id": {file id: Number},
-    "ext": {file extension: String},
-    "mime": {file mimetype: String},
-    "digest": {file digest: String}
+    "id": "{file id: Number}",
+    "ext": "{file extension: String}",
+    "mime": "{file mimetype: String}",
+    "digest": "{file digest: String}"
 }
 ```
