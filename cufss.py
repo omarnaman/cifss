@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort, Response
 from flask_sqlalchemy import SQLAlchemy
 from hashlib import sha256
 from magic import Magic
@@ -47,6 +47,11 @@ class File(db.Model):
         
         return str(file.id)
 
+    def read(self):
+        file_path = Path(STORAGE_PATH) / self.digest
+        with open(file_path, 'rb') as f:
+            return f.read()
+
     @classmethod
     def get(cls, id):
         file: File = cls.query.get(id)
@@ -73,7 +78,11 @@ def store():
 @app.route("/<id>", methods=["GET"])
 def get(id):
     if request.method == "GET":
-        return File.get(id)
+        file = File.get(id)
+        if file is None:
+            abort(404)
+        res = Response(response=file.read(), mimetype=file.mime_type)
+        return res
 
 @app.route("/print/<id>", methods=["POST"])
 def print_file(id):
