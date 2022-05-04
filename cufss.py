@@ -36,12 +36,18 @@ class File(db.Model):
         digest = sha256(data).hexdigest()
         mime_type = mime_magic.from_buffer(data)
         extension = guess_extension(mime_type)
-        file = File(digest, extension, mime_type)
 
         storage_path = Path(STORAGE_PATH)
         storage_path.mkdir(parents=True, exist_ok=True)
-        with open(storage_path / digest, 'wb') as f:
+        file_path = storage_path / digest
+        if file_path.is_file():
+            file = File.get_by_digest(digest)
+            assert(file is not None)
+            return str(file.id)
+
+        with open(file_path, 'wb') as f:
             f.write(data)
+        file = File(digest, extension, mime_type)
         db.session.add(file)
         db.session.commit()
         
@@ -51,6 +57,11 @@ class File(db.Model):
         file_path = Path(STORAGE_PATH) / self.digest
         with open(file_path, 'rb') as f:
             return f.read()
+
+    def get_by_digest(digest):
+        file = db.session.query(File).filter_by(digest=digest).first()
+        
+        return file
 
     @classmethod
     def get(cls, id):
