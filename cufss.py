@@ -79,7 +79,6 @@ db.create_all()
 @app.route("/", methods=["POST"])
 def store():
     if request.method == "POST":
-        print(request.files)
         if len(request.files) > 0:
             return File.store(request.files[""])
 
