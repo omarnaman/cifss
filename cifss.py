@@ -82,7 +82,10 @@ class File(db.Model):
     @classmethod
     def print(cls, id):
         file: File = cls.query.get(id)
-        return file.json()
+        if file:
+            return file.json()
+        else:
+            return None
 
 db.create_all()
 
@@ -106,7 +109,11 @@ def get(id):
 @app.route("/print/<id>", methods=["GET"])
 def print_file(id):
     if request.method == "GET":
-        return File.print(id)
+        res = File.print(id)
+        if res:
+            return res, 200
+        else:
+            return "", 404 
     abort(400)
 
 if __name__=="__main__":
