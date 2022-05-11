@@ -44,8 +44,6 @@ class File(db.Model):
     def store(fs):
         data = fs.stream.read()
         digest = sha256(data).hexdigest()
-        mime_type = mime_magic.from_buffer(data)
-        extension = guess_extension(mime_type)
 
         storage_path = Path(STORAGE_PATH)
         storage_path.mkdir(parents=True, exist_ok=True)
@@ -57,6 +55,8 @@ class File(db.Model):
 
         with open(file_path, 'wb') as f:
             f.write(data)
+            mime_type = mime_magic.from_file(file_path)
+        extension = guess_extension(mime_type)
         file = File(digest, extension, mime_type)
         db.session.add(file)
         db.session.commit()
