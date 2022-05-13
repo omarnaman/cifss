@@ -93,7 +93,7 @@ db.create_all()
 def store():
     if request.method == "POST":
         if len(request.files) > 0:
-            return File.store(request.files[""])
+            return File.store(request.files[list(request.files.keys())[0]])
 
         abort(400)
 
