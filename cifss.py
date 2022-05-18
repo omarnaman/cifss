@@ -4,7 +4,6 @@ from flask import Flask, request, abort, Response
 from flask_sqlalchemy import SQLAlchemy
 from hashlib import sha256
 from magic import Magic
-from mimetypes import guess_extension
 from pathlib import Path
 import json
 
@@ -20,28 +19,28 @@ mime_magic = Magic(mime=True)
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String)
     digest = db.Column(db.String, unique = True)
-    extension = db.Column(db.UnicodeText)
-    mime_type = db.Column(db.UnicodeText)
+    mime_type = db.Column(db.String)
 
     def __repr__(self) -> str:
-        return f"{self.id}:\n\text: {self.extension}\n\tmime: {self.mime_type}"
+        return self.json()
 
     def json(self)-> str:
         res = {
             "id": self.id,
-            "ext": self.extension,
+            "name": self.name,
             "mime": self.mime_type,
-            "digest": self.digest 
+            "digest": self.digest
         }
         return json.dumps(res)
 
-    def __init__(self, digest, extension, mime_type) -> None:
+    def __init__(self, name, digest, mime_type) -> None:
+        self.name = name
         self.digest = digest
-        self.extension = extension
         self.mime_type = mime_type
 
-    def store(fs):
+    def store(name, fs):
         data = fs.stream.read()
         digest = sha256(data).hexdigest()
 
@@ -56,8 +55,7 @@ class File(db.Model):
         with open(file_path, 'wb') as f:
             f.write(data)
             mime_type = mime_magic.from_file(file_path)
-        extension = guess_extension(mime_type)
-        file = File(digest, extension, mime_type)
+        file = File(name, digest, mime_type)
         db.session.add(file)
         db.session.commit()
         
@@ -93,7 +91,8 @@ db.create_all()
 def store():
     if request.method == "POST":
         if len(request.files) > 0:
-            return File.store(request.files[list(request.files.keys())[0]])
+            filename = list(request.files.keys())[0]
+            return File.store(filename, request.files[filename])
 
         abort(400)
 
