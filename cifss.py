@@ -6,6 +6,7 @@ from hashlib import sha256
 from magic import Magic
 from pathlib import Path
 import json
+import os
 
 
 STORAGE_PATH = "filestorage"
@@ -54,6 +55,8 @@ class File(db.Model):
 
         with open(file_path, 'wb') as f:
             f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
             mime_type = mime_magic.from_file(file_path)
         file = File(name, digest, mime_type)
         db.session.add(file)
