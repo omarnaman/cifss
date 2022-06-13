@@ -22,7 +22,7 @@ Return a dictionary containing information about a file with id=`<id>`.
 ```json
 {
     "id": "{file id: Number}",
-    "ext": "{file extension: String}",
+    "name": "{file name: String}",
     "mime": "{file mimetype: String}",
     "digest": "{file digest: String}"
 }
